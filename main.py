@@ -1,4 +1,4 @@
-import time, keyboard, random, sys
+import time, keyboard, random, sys, os
 
 WIDTH, HEIGHT = 60, 25
 FOOD, POINT, SNAKE, BORDER = 'F', ' ', '#', "@"
@@ -38,8 +38,7 @@ def initGrid():
     return grid
 
 def displayGrid(grid, score):
-    buffer = "\n"*500
-    buffer += "Score: " + str(score) + "\n\n"
+    buffer = "Score: " + str(score) + "\n\n"
     buffer += BORDER * (WIDTH+2) + "\n"
     for y in range(HEIGHT):
         buffer += BORDER
@@ -68,6 +67,12 @@ class Foods:
     def fill(self):
         while len(self.list) < self.foodsn:
             self.list.append(Position(random.randint(0, WIDTH-1), random.randint(0, HEIGHT-1)))
+    def checkCollision(self, pos):
+        collided = []
+        for food in self.list:
+            if pos == food:
+                collided.append(food)
+        return collided
 
 class Snake:
     def __init__(self, headx, heady):
@@ -93,7 +98,6 @@ class Snake:
             self.head.position += Position(0, 1)
         elif self.dir == UP:
             self.head.position += Position(0, -1)
-
     def checkBound(self):
         if self.head.position.x > WIDTH-1:
             self.head.setPosition(0, self.head.position.y)
@@ -103,7 +107,6 @@ class Snake:
             self.head.setPosition(WIDTH-1, self.head.position.y)
         if self.head.position.y < 0:
             self.head.setPosition(self.head.position.x, HEIGHT-1)
-
     def controls(self):
         if keyboard.is_pressed('A') or keyboard.is_pressed('left'):
             if snake.dir[0] != 1: snake.dir = LEFT
@@ -116,6 +119,7 @@ class Snake:
 
 if __name__=="__main__":
     grid = initGrid()
+    clear = "cls" if sys.platform == "win32" else "clear"
     score = 0
     snake = Snake(2, 0)
     foods = Foods()
@@ -132,16 +136,18 @@ if __name__=="__main__":
         snake.checkBound()
         for index in range(len(snake.nodes)):
             if index != 0:
-                if snake.nodes[0].position == snake.nodes[index].position:
+                if snake.head.position == snake.nodes[index].position:
                     running = False
                     break
-        for food in foods.list:
-            if snake.nodes[0].position == food:
+        collided = foods.checkCollision(snake.head.position)
+        if len(collided) != 0:
+            for food in collided:
                 foods.list.remove(food)
                 foods.fill()
                 snake.extend(snake.nodes[-1].position.x, snake.nodes[-1].position.y)
                 score += 1
         updateGrid(grid, snake.nodes, foods)
+        os.system(clear)
         displayGrid(grid, score)
         clearGrid(grid)
         time.sleep(0.1)
