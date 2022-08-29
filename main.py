@@ -1,7 +1,11 @@
 import time, keyboard, random, sys, os
 
-WIDTH, HEIGHT = 60, 25
-FOOD, POINT, SNAKE, BORDER = 'F', ' ', '#', "@"
+WIDTH, HEIGHT = 60, 15
+POINT = ' '
+if sys.platform == "win32":
+    FOOD, SNAKE, BORDER = '\u2593', '\u2588', "\u2588"
+else:
+    FOOD, SNAKE, BORDER = 'F', '#', "@"
 UP, DOWN, LEFT, RIGHT = (0, -1), (0, 1), (-1, 0), (1, 0)
 
 class Position:
